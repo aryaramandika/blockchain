@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  ethereum-node:
+    image: ethereum/client-go:alltools-v1.10.26-amd64
+    container_name: private-eth-node
+    ports:
+      - "8546:8546"    # WebSocket API
+      - "8545:8545"  # JSON-RPC
+      - "30303:30303" # P2P networking
+    volumes:
+      - ./data:/root/.ethereum
+    entrypoint: ["geth"]
+    command:
+      - "--datadir=/root/.ethereum"
+      - "--syncmode=snap"
+      - "--networkid=2025"
+      - "--http"
+      - "--cache=512"
+      - "--maxpeers=0"
+      - "--http.addr=0.0.0.0"
+      - "--http.port=8545"
+      - "--http.api=personal,eth,net,web3,miner"
+      - "--ws"
+      - "--ws.addr=0.0.0.0"
+      - "--ws.port=8546"
+      - "--ws.api=eth,net,web3,personal,miner"
+      - "--http.corsdomain=*"
+      - "--http.vhosts=*"
+      - "--allow-insecure-unlock"
+      - "--mine"
+      - "--miner.threads=1"
+      - "--nodiscover"
+      - "--miner.etherbase=0x1fe82713bA7067afC7914F67EB1773dee745a0Aa"
+
+  etherchain:
+    image: jpoon/etherchain-light
+    container_name: etherchain
+    ports:
+      - "4000:3000"  # Web UI
+    volumes:
+      - ./etherchain-config/config.js:/usr/src/app/config.js
+    depends_on:
+      - ethereum-node
